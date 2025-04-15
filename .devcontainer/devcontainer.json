@@ -1,0 +1,11 @@
+{
+    "name": "My TypeScript Dev Container",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+    "postCreateCommand": "npm install",
+    "forwardPorts": [
+        8080
+    ],
+    "features": {
+        "aws-cli": "latest"
+    }
+}

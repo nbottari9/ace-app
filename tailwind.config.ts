@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
 
 const config: Config = {
   content: [
@@ -16,8 +17,22 @@ const config: Config = {
         "second-place-silver": "#c0c0c0",
         "third-place-bronze": "#cd7f32",
       },
+      keyframes: {
+        gauge_fadeIn: {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        gauge_fill: {
+          from: { "stroke-dashoffset": "332", opacity: "0" },
+          to: { opacity: "1" },
+        },
+      },
+      animation: {
+        gauge_fadeIn: "gauge_fadeIn 1s ease forwards",
+        gauge_fill: "gauge_fill 1s ease forwards",
+      },
+      plugins: [animate],
     },
   },
-  plugins: [],
 };
 export default config;

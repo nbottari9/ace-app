@@ -1,5 +1,6 @@
 "use client"
-import { DMSans } from "FONTS"
+import { DMSans } from "@/app/fonts"
+import Link from "next/link"
 
 export const Header = () => {
     const openAccountMenu = () => {
@@ -7,7 +8,7 @@ export const Header = () => {
     }
     return (
         <div className="bg-gray-300 p-3 text-2xl flex flex-row justify-between items-center">
-            <div className={`${DMSans}`}>ACE</div>
+            <Link className={`${DMSans.className}`} href="/">ACE</Link>
             <button onClick={openAccountMenu} className="hover:bg-gray-400 rounded-full">
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-8">
