@@ -31,6 +31,9 @@
       ],
       "CONSTANTS": [
         "./src/app/constants"
+      ],
+      "AMPLIFY/*": [
+        "./amplify/*"
       ]
     }
   },

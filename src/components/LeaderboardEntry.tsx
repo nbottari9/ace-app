@@ -1,7 +1,7 @@
 
 import { DMSans } from "FONTS"
 
-export const LeaderboardPosition = ({ position, name, points }: { position: number, name: string, points: number }) => {
+export const LeaderboardEntry = ({ position, name, points }: { position: number, name: string, points: number }) => {
     let bgColor = "bg-light-purple"
     switch (position) {
         case 1:

@@ -1,3 +1,5 @@
+
+
 export interface QuickActionButtonProps {
     title: string
     description: string
@@ -5,8 +7,12 @@ export interface QuickActionButtonProps {
     redirectUrl: string
 }
 
-export interface LeaderboardPositionProps {
-    name: string
-    position: number
+export interface Member {
+    name: string,
     points: number
+}
+
+export interface MemberSearchProps {
+    members: Member[]
+    setMember: (member: Member) => Dispatch<SetStateAction<Member>>
 }

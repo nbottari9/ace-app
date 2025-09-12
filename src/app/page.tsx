@@ -1,67 +1,70 @@
-"use client"
-// import Image from "next/image";
+import { LeaderboardEntry } from "@/components/LeaderboardEntry"
+import { DMSans } from "@/app/fonts";
+import { generateServerClientUsingCookies } from "@aws-amplify/adapter-nextjs/data"
+import { Schema } from "AMPLIFY/data/resource";
+import outputs from "../../amplify_outputs.json"
+import { cookies } from "next/headers";
 
-import { DMSans } from "FONTS";
-import { AbsoluteCenter, ProgressCircle } from "@chakra-ui/react";
-import { QuickActionButton } from "@/components/QuickActionButton";
-import { QuickActionButtonProps } from "@/types/types";
+// const testdata: LeaderboardPositionProps[] = [
+//     {
+//         name: "John Doe",
+//         position: 1,
+//         points: 100
+//     },
+//     {
+//         name: "John Doe",
+//         position: 2,
+//         points: 100
+//     },
+//     {
+//         name: "John Doe",
+//         position: 3,
+//         points: 100
 
-const quickactionbuttons: QuickActionButtonProps[] = [
-    {
-        title: "Get involved",
-        description: "Volunteer for an ACE event!",
-        icon: "GET_INVOLVED",
-        redirectUrl: "https://umasslowellclubs.campuslabs.com/engage/organization/association-for-campus-events/events"
-    },
-    {
-        title: "Social Media",
-        description: "Check out ACE Social Media!",
-        icon: "SOCIAL_MEDIA",
-        redirectUrl: "https://linktr.ee/umlace"
-    },
-    {
-        title: "Upcoming Events",
-        description: "Upcoming ACE Events on campus",
-        icon: "UPCOMING_EVENTS",
-        redirectUrl: "https://umasslowellclubs.campuslabs.com/engage/organization/association-for-campus-events/events"
-    },
-    {
-        title: "Leaderboard",
-        description: "Attendance rewards leaderboard",
-        icon: "UPCOMING_EVENTS",
-        redirectUrl: "/leaderboard"
+//     },
+//     {
+//         name: "John Doe",
+//         position: 4,
+//         points: 100
+//     }
+// ]
+
+const cookieBasedClient = generateServerClientUsingCookies<Schema>({
+    config: outputs,
+    cookies
+})
+
+
+const getLeaderboard = async (): Promise<Schema["Member"]["type"][] | null> => {
+    const { data, errors } = await cookieBasedClient.models.Member.list({
+        sortDirection: "DESC"
+    })
+
+    if (errors) {
+        console.error(errors)
+        return null
     }
-]
-export default function Home() {
-    const points = 40;
 
+    return data
+}
+
+const leaderboard = await getLeaderboard();
+
+export default async function LeaderboardPage() {
     return (
-        <div className="flex flex-col items-center p-4 gap-10 h-full">
-            <div className={`text-6xl ${DMSans.className} pt-9`}>Hi, Nick</div>
-
-            {/*this is probably bad*/}
-            <ProgressCircle.Root css={{ "--size": "200px" }} value={points}>
-                <ProgressCircle.Circle strokeLinecap={"round"} css={{ "--size": "200px" }}>
-                    <ProgressCircle.Track css={{ "--size": "200px", "--thickness": "1em" }} />
-                    <ProgressCircle.Range css={{ "--size": "200px", "--thickness": "1em" }} />
-                </ProgressCircle.Circle>
-                <AbsoluteCenter>
-                    <div className={`${DMSans.className} text-6xl`}>
-                        {points}
-                    </div>
-                </AbsoluteCenter>
-            </ProgressCircle.Root>
-            <div className={`${DMSans.className} text-xl`}>your attendance points</div>
-            <div className="grid grid-cols-2 w-screen h-full">
+        <div className="flex flex-col w-full items-center justify-center gap-4 pt-4">
+            <div className={`${DMSans.className} text-3xl font-md`}>Current Rankings</div>
+            <div className="flex flex-col justify-start gap-3 p-3 w-full">
                 {
-                    quickactionbuttons.map((p, idx) => (
-                        <QuickActionButton props={p} key={idx} />
-                    ))
+                    leaderboard ? (
+                        leaderboard.map((p, idx) => (
+                            <LeaderboardEntry position={idx + 1} name={p.name} points={p.points} key={idx} />
+                        ))
+                    ) : (
+                        <></>
+                    )
                 }
             </div>
-
-        </div >
-
-
-    );
+        </div>
+    )
 }
