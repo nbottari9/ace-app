@@ -1,7 +1,8 @@
 "use client"
 import { DMSans } from "@/app/fonts";
-import { Member, MemberSearchProps } from "@/types/types";
+import { MemberSearchProps } from "@/types/types";
 import { Input } from "@chakra-ui/react"
+import { Schema } from "AMPLIFY/data/resource";
 import { ChangeEvent, useState } from "react";
 
 
@@ -9,7 +10,7 @@ import { ChangeEvent, useState } from "react";
 export const MemberSearch = ({ props }: { props: MemberSearchProps }) => {
 
     const [input, setInput] = useState("");
-    const [suggestions, setSuggestions] = useState<Member[]>([]);
+    const [suggestions, setSuggestions] = useState<Schema["Member"]["type"][]>([]);
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
@@ -26,7 +27,7 @@ export const MemberSearch = ({ props }: { props: MemberSearchProps }) => {
         }
     };
 
-    const handleSuggestionClick = (suggestion: Member) => {
+    const handleSuggestionClick = (suggestion: Schema["Member"]["type"]) => {
         setInput(suggestion.name); // Set input to the clicked suggestion
         setSuggestions([]); // Clear suggestions
         props.setMember(suggestion)

@@ -1,5 +1,6 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 
+
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
 adding a new "isDone" field as a boolean. The authorization rule below
@@ -9,7 +10,14 @@ and "delete" any "Todo" records.
 const schema = a.schema({
   Member: a.model({
     name: a.string().required(),
-    points: a.integer().required()
+    points: a.integer().required(),
+    history: a.hasMany("History", "memberId")
+  }).authorization(allow => allow.publicApiKey()),
+  History: a.model({
+    memberId: a.id(),
+    member: a.belongsTo("Member", "memberId"),
+    value: a.integer(),
+    reason: a.string()
   }).authorization(allow => allow.publicApiKey())
 });
 

@@ -1,3 +1,4 @@
+import { Schema } from "AMPLIFY/data/resource"
 
 
 export interface QuickActionButtonProps {
@@ -13,6 +14,6 @@ export interface Member {
 }
 
 export interface MemberSearchProps {
-    members: Member[]
-    setMember: (member: Member) => Dispatch<SetStateAction<Member>>
+    members: Schema["Member"]["type"][]
+    setMember: (member: Schema["Member"]["type"]) => Dispatch<SetStateAction<Schema["Member"]["type"]>>
 }

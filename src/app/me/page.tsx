@@ -4,8 +4,8 @@
 import { DMSans } from "FONTS";
 import { Icon } from "@chakra-ui/react";
 import { QuickActionButton } from "@/components/QuickActionButton";
-import { Member, QuickActionButtonProps } from "@/types/types";
-import { generateClient } from "aws-amplify/api";
+import { QuickActionButtonProps } from "@/types/types";
+import { generateClient, SelectionSet } from "aws-amplify/api";
 import { Schema } from "AMPLIFY/data/resource";
 import { MemberSearch } from "@/components/MemberSearch";
 import { useEffect, useState } from "react";
@@ -45,8 +45,10 @@ const client = generateClient<Schema>()
 
 export default function Me() {
 
-    const [members, setMembers] = useState<Member[]>()
-    const [selected, setSelected] = useState<Member | null>()
+    type memberSelectionSet = ["name", "points", "history.*"]
+    const [members, setMembers] = useState<Schema["Member"]["type"][]>()
+    const [member, setMember] = useState<SelectionSet<Schema["Member"]["type"], memberSelectionSet>>()
+    const [selected, setSelected] = useState<Schema["Member"]["type"] | null>()
 
     useEffect(() => {
         client.models.Member.list().then(({ data, errors }) => {
@@ -57,6 +59,22 @@ export default function Me() {
             setMembers(data)
         })
     }, [])
+
+    useEffect(() => {
+        client.models.Member.get({
+            id: selected ? selected?.id : "",
+
+        }, {
+            selectionSet: [
+                "name", "points", "history.*"
+            ]
+        }).then(({ data, errors }) => {
+            if (data && !errors) {
+                setMember(data)
+            }
+
+        })
+    }, [selected])
 
     const returnToSearch = () => {
         setSelected(null)
@@ -80,6 +98,16 @@ export default function Me() {
                                 ))
                             }
                         </div> */}
+                        <div>History</div>
+                        <div className="flex flex-col gap-2">
+                            {
+                                member ? (
+                                    member.history.map((h, idx) => (
+                                        <div className="w-screen bg-neutral-400 text-center" key={idx}>{h.value}, {h.reason}</div>
+                                    ))
+                                ) : (<div>no history</div>)
+                            }
+                        </div>
                     </>
                 ) : (
                     <> {

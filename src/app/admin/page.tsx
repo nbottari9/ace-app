@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { MemberSearch } from "@/components/MemberSearch";
 import { Schema } from "AMPLIFY/data/resource";
 import { generateClient } from "@aws-amplify/api";
-import { Member } from "@/types/types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { addPoints } from "../actions";
 
 const client = generateClient<Schema>()
 
 export default function Admin() {
-    const [members, setMembers] = useState<Member[]>()
-    const [selected, setSelected] = useState<Member | null>()
+    const [members, setMembers] = useState<Schema["Member"]["type"][]>()
+    const [selected, setSelected] = useState<Schema["Member"]["type"]>()
     const [showAddPoints, setShowAddPoints] = useState(false)
 
     useEffect(() => {
@@ -25,6 +25,8 @@ export default function Admin() {
         })
     }, [])
 
+    const addPointsWithProps = addPoints.bind(null, selected!)
+
     return (
         <div>
             <div className="flex flex-col gap-2">
@@ -36,7 +38,7 @@ export default function Admin() {
                 </Button>
             </div>
             <Dialog.Root open={showAddPoints} onOpenChange={(e) => setShowAddPoints(e.open)}>
-                <form action={ }>
+                <form action={addPointsWithProps}>
                     <Dialog.Trigger />
                     <Dialog.Backdrop />
                     <Dialog.Positioner>
@@ -54,12 +56,17 @@ export default function Admin() {
                                     {members ? (<MemberSearch props={{ members, setMember: setSelected }} />) : (<LoadingSpinner />)}
                                 </Field>
                                 <Field className="pt-3">
-                                    <Input placeholder="Points" className="border-black border" />
+                                    <Input placeholder="Points" className="border-black border" name="value" />
+                                </Field>
+                                <Field className="pt-3">
+                                    <Input placeholder="Reason" className="border-black border" name="reason" />
                                 </Field>
                             </Dialog.Body>
                             <Dialog.Footer>
-                                <Button className="border-black border text-red-500">Cancel</Button>
-                                <Button className="border-black border text-green-300">Submit</Button>
+
+                                {/* <Button className="border-black border text-red-500">Cancel</Button> */}
+
+                                <Button className="border-black border text-green-300" type="submit">Submit</Button>
                             </Dialog.Footer>
                         </Dialog.Content>
                     </Dialog.Positioner>
