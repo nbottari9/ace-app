@@ -11,8 +11,10 @@ const schema = a.schema({
   Member: a.model({
     name: a.string().required(),
     points: a.integer().required(),
-    history: a.hasMany("History", "memberId")
-  }).authorization(allow => allow.publicApiKey()),
+    history: a.hasMany("History", "memberId"),
+    cgNetId: a.id().required()
+  }).secondaryIndexes((index) => [index("cgNetId")])
+    .authorization(allow => allow.publicApiKey()),
   History: a.model({
     memberId: a.id(),
     member: a.belongsTo("Member", "memberId"),
