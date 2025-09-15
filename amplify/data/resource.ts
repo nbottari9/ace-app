@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { parseAttendanceReports } from '../functions/parseAttendanceReports/resource';
 
 
 /*== STEP 1 ===============================================================
@@ -14,14 +15,15 @@ const schema = a.schema({
     history: a.hasMany("History", "memberId"),
     cgNetId: a.id().required()
   }).secondaryIndexes((index) => [index("cgNetId")])
-    .authorization(allow => allow.publicApiKey()),
+    .authorization(allow => [allow.publicApiKey(), allow.guest()]),
   History: a.model({
     memberId: a.id(),
     member: a.belongsTo("Member", "memberId"),
     value: a.integer(),
     reason: a.string()
   }).authorization(allow => allow.publicApiKey())
-});
+}).authorization(allow => allow.resource(parseAttendanceReports).to(["query", "mutate"]));
+
 
 export type Schema = ClientSchema<typeof schema>;
 

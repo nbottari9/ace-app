@@ -17,3 +17,9 @@ export interface MemberSearchProps {
     members: Schema["Member"]["type"][]
     setMember: (member: Schema["Member"]["type"]) => Dispatch<SetStateAction<Schema["Member"]["type"]>>
 }
+
+export type AttendanceReportCSVEntry = {
+    "First Name": string
+    "Last Name": string
+    "Net ID": string
+}

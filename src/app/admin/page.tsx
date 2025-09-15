@@ -6,7 +6,8 @@ import { MemberSearch } from "@/components/MemberSearch";
 import { Schema } from "AMPLIFY/data/resource";
 import { generateClient } from "@aws-amplify/api";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { addPoints, handleFileUpload } from "../actions";
+import { addPoints } from "../actions";
+import { uploadData } from "@aws-amplify/storage/s3";
 
 const client = generateClient<Schema>()
 
@@ -16,6 +17,7 @@ export default function Admin() {
     const [showAddPoints, setShowAddPoints] = useState(false)
     const [showUploadFile, setShowUploadFile] = useState(false)
     const [file, setFile] = useState<File>()
+    const [fileUploadLoading, setFileUploadLoading] = useState(false)
 
     useEffect(() => {
         client.models.Member.list().then(({ data, errors }) => {
@@ -25,14 +27,34 @@ export default function Admin() {
             }
             setMembers(data)
         })
-    }, [])
+    }, [showAddPoints])
 
     const addPointsWithProps = addPoints.bind(null, selected!)
-    const handleFileUploadWithProps = handleFileUpload.bind(null, file!)
+    // const handleFileUploadWithProps = handleFileUpload.bind(null, file!)
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         setFile(event.target.files?.[0])
     }
+
+    const handleFileUpload = () => {
+        if (!file) {
+            return
+        }
+        setFileUploadLoading(true)
+        const upload = uploadData({
+            path: `attendanceReports/${file.name}`,
+            data: file,
+            options: {
+                bucket: "attendanceReports"
+            }
+        })
+        upload.result.then((data) => {
+            console.log(data)
+            setFileUploadLoading(false)
+            setShowUploadFile(false)
+        })
+    }
+
 
     return (
         <div>
@@ -85,33 +107,37 @@ export default function Admin() {
             </Dialog.Root>
             {/*upload csv dialog */}
             <Dialog.Root open={showUploadFile} onOpenChange={(e) => setShowUploadFile(e.open)}>
-                <form action={handleFileUploadWithProps}>
-                    <Dialog.Trigger />
-                    <Dialog.Backdrop />
-                    <Dialog.Positioner>
-                        <Dialog.Content>
-                            <Dialog.CloseTrigger asChild>
-                                <CloseButton />
-                            </Dialog.CloseTrigger>
-                            <Dialog.Header>
-                                <Dialog.Title className="text-xl font-bold">
-                                    Upload
-                                </Dialog.Title>
-                            </Dialog.Header>
-                            <Dialog.Body>
-                                <Field className="pt-3">
-                                    <Input placeholder="Upload" className="border-black border" type="file" onChange={handleChange} />
-                                </Field>
-                            </Dialog.Body>
-                            <Dialog.Footer>
+                {/* <form action={handleFileUpload}> */}
+                <Dialog.Trigger />
+                <Dialog.Backdrop />
+                <Dialog.Positioner>
+                    <Dialog.Content>
+                        <Dialog.CloseTrigger asChild>
+                            <CloseButton />
+                        </Dialog.CloseTrigger>
+                        <Dialog.Header>
+                            <Dialog.Title className="text-xl font-bold">
+                                Upload
+                            </Dialog.Title>
+                        </Dialog.Header>
+                        <Dialog.Body>
+                            {
+                                fileUploadLoading ? (<LoadingSpinner />) : (
 
-                                {/* <Button className="border-black border text-red-500">Cancel</Button> */}
+                                    <Field className="pt-3">
+                                        <Input placeholder="Upload" className="border-black border" type="file" onChange={handleChange} />
+                                    </Field>
+                                )}
+                        </Dialog.Body>
+                        <Dialog.Footer>
 
-                                <Button className="border-black border text-green-300" type="submit">Submit</Button>
-                            </Dialog.Footer>
-                        </Dialog.Content>
-                    </Dialog.Positioner>
-                </form>
+                            {/* <Button className="border-black border text-red-500">Cancel</Button> */}
+
+                            <Button className="border-black border text-green-300" type="submit" onClick={handleFileUpload}>Submit</Button>
+                        </Dialog.Footer>
+                    </Dialog.Content>
+                </Dialog.Positioner>
+                {/* </form> */}
             </Dialog.Root>
 
         </div>
