@@ -23,3 +23,9 @@ export type AttendanceReportCSVEntry = {
     "Last Name": string
     "Net ID": string
 }
+
+export interface RawMember {
+    "First Name": string
+    "Last Name": string
+    "Net ID": string
+}

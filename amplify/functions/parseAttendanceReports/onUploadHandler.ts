@@ -14,7 +14,6 @@ interface RawMember {
     "Net ID": string
 }
 const s3 = new S3
-// const ddb = new DynamoDBClient()
 
 const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
 
@@ -23,8 +22,6 @@ Amplify.configure(resourceConfig, libraryOptions);
 const client = generateClient<Schema>();
 
 export const handler: S3Handler = async (event) => {
-    // const tables = await ddb.send(new ListTablesCommand())
-    // const tableName = tables.TableNames?.find((element) => element.includes("Member"))
     try {
         for (const record of event.Records) {
             const bucket = record.s3.bucket.name
@@ -43,30 +40,24 @@ export const handler: S3Handler = async (event) => {
                 skipEmptyLines: true,
                 dynamicTyping: true,
             })
+            const { data: members, errors } = await client.models.Member.list()
+            if (errors) {
+                console.error(errors)
+            }
+            for (const member of parsed.data) {
+                const checkForMember = members.find(m => m.cgNetId == member["Net ID"])
+                if (!checkForMember) {
+                    const { data: newMember, errors: createErrors } = await client.models.Member.create({
+                        name: `${member["First Name"]} ${member["Last Name"]}`,
+                        cgNetId: `${member["Net ID"]}`,
+                        points: 0
+                    })
+                    if (errors) {
+                        console.error(createErrors)
+                    }
+                }
 
-            console.log(parsed)
-
-            parsed.data.forEach(async (member) => {
-                client.models.Member.create({
-                    name: `${member["First Name"]} ${member["Last Name"]}`,
-                    cgNetId: `${member["Net ID"]}`,
-                    points: 0
-                })
-                // ddb.send(new PutItemCommand({
-                //     TableName: tableName,
-                //     Item: {
-                //         "name": {
-                //             S: `${member["First Name"]} ${member["Last Name"]}`
-                //         },
-                //         "cgNetId": {
-                //             S: `${member["Net ID"]}`
-                //         },
-                //         "points": {
-                //             N: "0"
-                //         }
-                //     }
-                // }))
-            })
+            }
         }
     } catch (err) {
         console.error("Error processing CSV:", err);
