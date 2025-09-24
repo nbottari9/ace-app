@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PointsGauge } from "@/components/PointsGauge";
+import { HistoryEntry } from "@/components/HistoryEntry";
+import { History } from "@/components/History"
 
 // const quickactionbuttons: QuickActionButtonProps[] = [
 //     {
@@ -88,7 +90,7 @@ export default function Me() {
                         <Icon onClick={returnToSearch} className="absolute left-5">
                             <FaArrowLeftLong className="text-2xl" />
                         </Icon>
-                        <div className={`text-6xl ${DMSans.className} pt-9`}>Hi, {selected?.name}</div>
+                        <div className={`text-5xl ${DMSans.className} pt-9`}>Hi, {selected?.name}</div>
                         <PointsGauge points={selected?.points} />
                         <div className={`${DMSans.className} text-xl`}>your attendance points</div>
                         {/* <div className="grid grid-cols-2 w-screen h-full">
@@ -98,23 +100,11 @@ export default function Me() {
                                 ))
                             }
                         </div> */}
-                        <div>History</div>
-                        <div className="flex flex-col gap-2">
-                            {
-                                member ? (
-                                    member.history.map((h, idx) => (
-                                        <div className="w-screen bg-neutral-400 text-center" key={idx}>{h.value}, {h.reason}</div>
-                                    ))
-                                ) : (<div>no history</div>)
-                            }
-                        </div>
+                        <div className={`${DMSans.className} text-3xl`}>History</div>
+                        <History history={member!.history} />
                     </>
                 ) : (
-                    <> {
-                        members ? (<MemberSearch props={{ members, setMember: setSelected }} />) : (<LoadingSpinner />)
-                    }
-
-                    </>
+                    members ? (<MemberSearch props={{ members, setMember: setSelected }} />) : (<LoadingSpinner />)
                 )
             }
 

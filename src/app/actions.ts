@@ -4,8 +4,7 @@ import { generateServerClientUsingCookies } from "@aws-amplify/adapter-nextjs/ap
 import { Schema } from "AMPLIFY/data/resource"
 import { cookies } from "next/headers"
 import outputs from "../../amplify_outputs.json"
-import { parse } from "papaparse"
-import { readFile } from "fs"
+import { SelectionSet } from "aws-amplify/api"
 
 const cookieBasedClient = generateServerClientUsingCookies<Schema>({
     config: outputs,
@@ -28,57 +27,41 @@ export const addPoints = async (member: Schema["Member"]["type"], formData: Form
 
 }
 
-export const processCsvFile = async (csvFile: File) => {
+export const getMembers = async () => {
+    return cookieBasedClient.models.Member.list()
+}
 
-    interface RawMember {
-        "First Name": string
-        "Last Name": string
-        "Net ID": string
+
+export const getMember = async ({ memberId }: { memberId: string }): Promise<Schema["Member"]["type"] | null | undefined> => {
+    const { data: member, errors } = await cookieBasedClient.models.Member.get({
+        id: memberId
+    })
+
+    if (errors) {
+        console.error(errors)
+        return
     }
+    return member
+}
 
-    if (!csvFile) {
+const memberSelectionSet = ["history.*"] as const
+export const getMemberHistory = async ({ memberId }: { memberId: string }): Promise<SelectionSet<Schema["Member"]["type"], typeof memberSelectionSet> | null | undefined> => {
+
+    const { data: memberWithHistory, errors } = await cookieBasedClient.models.Member.get({
+        id: memberId
+    }, {
+        selectionSet: memberSelectionSet
+    })
+
+    if (errors) {
+        console.error(errors)
         return
     }
 
-    try {
-        readFile(csvFile, (data) => {
-            console.log(data)
-        })
-        const parsedData: RawMember[] = await new Promise<RawMember[]>((resolve, reject) => {
-            parse<RawMember>(csvFile, {
-                header: true,
-                skipEmptyLines: true,
-                dynamicTyping: true,
-                complete: (results) => {
-                    resolve(results.data);
-                },
-                error: (err) => {
-                    reject(err);
-                }
-            });
-        });
-
-        console.log(parsedData)
-
-        const { data: members, errors } = await cookieBasedClient.models.Member.list();
-        if (errors) {
-            console.error(errors);
-        }
-        for (const member of parsedData) {
-            const checkForMember = members.find(m => m.cgNetId == member["Net ID"]);
-            if (!checkForMember) {
-                const { errors: createErrors } = await cookieBasedClient.models.Member.create({
-                    name: `${member["First Name"]} ${member["Last Name"]}`,
-                    cgNetId: `${member["Net ID"]}`,
-                    points: 0
-                });
-                if (createErrors) {
-                    console.error(createErrors);
-                }
-            }
-        }
-    } catch (err) {
-        console.error("Error processing CSV:", err);
-        throw err;
+    if (!memberWithHistory) {
+        return
     }
+
+    return memberWithHistory
+
 }

@@ -4,6 +4,7 @@ import { generateServerClientUsingCookies } from "@aws-amplify/adapter-nextjs/da
 import { Schema } from "AMPLIFY/data/resource";
 import outputs from "../../amplify_outputs.json"
 import { cookies } from "next/headers";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 // const testdata: LeaderboardPositionProps[] = [
 //     {
@@ -37,7 +38,7 @@ const cookieBasedClient = generateServerClientUsingCookies<Schema>({
 
 const getLeaderboard = async (): Promise<Schema["Member"]["type"][] | null> => {
     const { data, errors } = await cookieBasedClient.models.Member.list({
-        sortDirection: "DESC"
+        sortDirection: "DESC",
     })
 
     if (errors) {
@@ -48,7 +49,7 @@ const getLeaderboard = async (): Promise<Schema["Member"]["type"][] | null> => {
     return data
 }
 
-const leaderboard = await getLeaderboard();
+const leaderboard = (await getLeaderboard())?.sort((a, b) => b.points - a.points);
 
 export default async function LeaderboardPage() {
     return (
@@ -61,7 +62,7 @@ export default async function LeaderboardPage() {
                             <LeaderboardEntry position={idx + 1} name={p.name} points={p.points} key={idx} />
                         ))
                     ) : (
-                        <></>
+                        <LoadingSpinner />
                     )
                 }
             </div>

@@ -4,8 +4,10 @@ import React, { Dispatch, SetStateAction } from 'react'
 import { Schema } from 'AMPLIFY/data/resource';
 import { DMSans } from '@/app/fonts';
 import { LoadingSpinner } from './LoadingSpinner';
+import { useRouter } from 'next/navigation';
 
 export const ViewMembersDialog = ({ showViewMembers, setShowViewMembers, members }: { showViewMembers: boolean, setShowViewMembers: Dispatch<SetStateAction<boolean>>, members: Schema["Member"]["type"][] | undefined }) => {
+    const router = useRouter()
     return (
         <Dialog.Root open={showViewMembers} onOpenChange={(e) => setShowViewMembers(e.open)}>
 
@@ -24,7 +26,11 @@ export const ViewMembersDialog = ({ showViewMembers, setShowViewMembers, members
                     <Dialog.Body className="flex flex-col gap-2 overflow-scroll">
                         {
                             members ? (members!.map((member, idx) => (
-                                <div key={idx} className={`flex justify-between p-4 bg-neutral-300 ${DMSans.className}`}>
+                                <div key={idx} className={`flex justify-between p-4 bg-neutral-300 ${DMSans.className}`} onClick={
+                                    () => {
+                                        router.push(`/admin/member/${member.id}`)
+                                    }
+                                }>
                                     <div className={`${DMSans.className}`}>{member.name}</div>
                                     <div className={`${DMSans.className}`}>{member.points}</div>
                                 </div>)))
